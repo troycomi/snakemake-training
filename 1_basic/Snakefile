@@ -1,0 +1,120 @@
+# snakefiles are "marked up" python code
+
+# 1) import any extra scripts or libraries
+
+# 2) find all input files:
+
+# -from configuration file or other list
+# ids = config['samples']
+# ids = ['id1', 'id2', 'id3']
+
+# -from the filesystem using glob wildcards
+
+# 3) build final output
+
+# 4) create rule "all" for default (final) outputs
+rule all:
+    input: 'STARRpeaker/SAMPLE_ID_csorted_noDups_STARRpeaker.bam'
+
+# 5) build rules following pipeline with input functions above as needed
+rule dmel_trim:  # name will be used for job-name later
+    # using trimmomatic version 0.39
+    input:  # lists are specified like so, access with input[0]
+        'FASTQ/SAMPLE_ID_1.fastq.gz',
+        'FASTQ/SAMPLE_ID_2.fastq.gz',
+
+    output:  # or with names, acces like output[trim_1]
+        trim_1='trimmed/SAMPLE_ID_1.TRIMMED.fastq.gz',
+        trim_2='trimmed/SAMPLE_ID_2.TRIMMED.fastq.gz',
+        unpaired_1='trimmed/SAMPLE_ID_1.unpaired.fastq.gz',
+        unpaired_2='trimmed/SAMPLE_ID_2.unpaired.fastq.gz',
+
+    shell:  # write any command, remember adjacent python strings are concatenated (without newlines)
+        'java -Xmx8000m '  # note the space!
+            '-jar JAR_PATH/trimmomatic-0.39.jar '
+            'PE '
+            '-threads 4 '
+            '-trimlog SAMPLE_ID_trimlog '
+            '-phred33 '
+            '{input} '  # will expand to '{input[0]} {input[1]}
+            '{output[trim_1]} '
+            '{output[unpaired_1]} '
+            '{output[trim_2]} '
+            '{output[unpaired_2]} '
+            'ILLUMINACLIP:ADAPTER_PATH/adapters.fa:1:30:7 '
+            'SLIDINGWINDOW:4:15 '
+            'MINLEN:20'
+
+rule Amel_bwa:
+    # using bwa version 0.7.16a-r1181
+    input:
+        reference='GENOME_PATH/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna',
+        fastq1='trimmed/SAMPLE_ID_1.TRIMMED.fastq.gz',
+        fastq2='trimmed/SAMPLE_ID_2.TRIMMED.fastq.gz',
+
+    output:
+        'BAMs/SAMPLE_ID.bam'
+
+    shell:
+    'bwa mem '
+        '-M -t 4 '
+        '{input.reference} '
+        '{input.fastq1} '
+        '{input.fastq2} '
+        '> {output}'
+
+rule sort_bam:
+    # using samtools version Version: 1.3
+    input:
+        'BAMs/SAMPLE_ID.bam'
+
+    output:
+        csort='BAMs/SAMPLE_ID_csorted.bam',
+        nsort='BAMs/SAMPLE_ID_nsorted.bam',
+
+    shell:
+        'samtools sort {input} > {output.csort} \n'  # NOTE \n, makes two commands
+        'samtools sort -n {input} > {output.nsort}'
+
+rule dedup_bam:
+    # using picard version picard-2.21.2
+    input:
+        'BAMs/SAMPLE_ID_csorted.bam'
+
+    output:
+        bam='BAMs/SAMPLE_ID_csorted_noDups.bam',
+        metric='BAMs/SAMPLE_ID_marked_dup_metrics.txt'
+
+    shell:
+        'java -jar JAR_PATH/picard.jar '
+            'MarkDuplicates '
+            'I={input} '
+            'O={output.bam} '
+            'M={output.metric} '
+            'REMOVE_DUPLCIATES=true '
+
+rule starrpeaker:
+    # https://github.com/gersteinlab/starrpeaker
+    input:
+        bam='BAMs/SAMPLE_ID_csorted_noDups.bam',
+        chromsize='chr_sizes.txt'
+
+    output:
+        bam='STARRpeaker/SAMPLE_ID_csorted_noDups_STARRpeaker.bam',
+        bed_bin='STARRpeaker/SAMPLE_ID.bin.bed',  # NOTE BELOW
+        bam_bct='STARRpeaker/SAMPLE_ID.bam.bct',
+        cov_tsv='STARRpeaker/SAMPLE_ID.cov.tsv',
+        peak_bed='STARRpeaker/SAMPLE_ID.peak.bed',
+        merged='STARRpeaker/SAMPLE_ID.merged.bed',
+    # outputs from bed_bin on are created implicitly through the prefix argument
+    # it's good practice to list them so dependent rules can correctly update
+    # also if one isn't created, snakemake will raise an exception to
+    # signal something is wrong
+
+    shell:
+        'module load python/2.7.14 \n'
+        'starrpeaker '
+            '--prefix STARRpeaker/SAMPLE_ID '
+            '-i {input.bam} '
+            '--chromsize {input.chromsize} '
+            '-o {output.bam} '
