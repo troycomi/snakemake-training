@@ -17,7 +17,7 @@ rule all:
     input: 'STARRpeaker/SAMPLE_ID_csorted_noDups_STARRpeaker.bam'
 
 # 5) build rules following pipeline with input functions above as needed
-rule dmel_trim:  # name will be used for job-name later
+rule trim:  # name will be used for job-name later
     # using trimmomatic version 0.39
     input:  # lists are specified like so, access with input[0]
         'FASTQ/SAMPLE_ID_1.fastq.gz',
@@ -28,13 +28,14 @@ rule dmel_trim:  # name will be used for job-name later
         trim_2='trimmed/SAMPLE_ID_2.TRIMMED.fastq.gz',
         unpaired_1='trimmed/SAMPLE_ID_1.unpaired.fastq.gz',
         unpaired_2='trimmed/SAMPLE_ID_2.unpaired.fastq.gz',
+        trimlog='trimmed/SAMPLE_ID_trimlog'
 
     shell:  # write any command, remember adjacent python strings are concatenated (without newlines)
         'java -Xmx8000m '  # note the space!
             '-jar JAR_PATH/trimmomatic-0.39.jar '
             'PE '
             '-threads 4 '
-            '-trimlog SAMPLE_ID_trimlog '
+            '-trimlog {output[trimlog]} '
             '-phred33 '
             '{input} '  # will expand to '{input[0]} {input[1]}
             '{output[trim_1]} '
@@ -45,7 +46,7 @@ rule dmel_trim:  # name will be used for job-name later
             'SLIDINGWINDOW:4:15 '
             'MINLEN:20'
 
-rule Amel_bwa:
+rule bwa:
     # using bwa version 0.7.16a-r1181
     input:
         reference='GENOME_PATH/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna',
@@ -56,12 +57,12 @@ rule Amel_bwa:
         'BAMs/SAMPLE_ID.bam'
 
     shell:
-    'bwa mem '
-        '-M -t 4 '
-        '{input.reference} '
-        '{input.fastq1} '
-        '{input.fastq2} '
-        '> {output}'
+        'bwa mem '
+            '-M -t 4 '
+            '{input.reference} '
+            '{input.fastq1} '
+            '{input.fastq2} '
+            '> {output}'
 
 rule sort_bam:
     # using samtools version Version: 1.3
@@ -73,6 +74,7 @@ rule sort_bam:
         nsort='BAMs/SAMPLE_ID_nsorted.bam',
 
     shell:
+        'module load samtools/1.10 \n'
         'samtools sort {input} > {output.csort} \n'  # NOTE \n, makes two commands
         'samtools sort -n {input} > {output.nsort}'
 
@@ -91,7 +93,7 @@ rule dedup_bam:
             'I={input} '
             'O={output.bam} '
             'M={output.metric} '
-            'REMOVE_DUPLCIATES=true '
+            'REMOVE_DUPLICATES=true '
 
 rule starrpeaker:
     # https://github.com/gersteinlab/starrpeaker
@@ -117,4 +119,6 @@ rule starrpeaker:
             '--prefix STARRpeaker/SAMPLE_ID '
             '-i {input.bam} '
             '--chromsize {input.chromsize} '
+            '--blacklist blacklist.bed '
+            '--cov covariate.bigwig '
             '-o {output.bam} '
