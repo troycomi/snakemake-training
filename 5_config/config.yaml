@@ -1,0 +1,53 @@
+---
+# this yaml contains all paths and urls specific to a run
+
+# the product of these will be generated
+samples:
+  - "S2"
+
+replicates:
+  - "1"
+  - "2"
+
+sorting:
+  - "csorted"
+  - "nsorted"
+
+# I suggest you either use full paths for all files or specify the
+# working directory here
+paths:
+  working_dir: "/home/tcomi/projects/snakemake-training/testing"
+  # working_dir: "/absolute/path/to/data/"
+
+  reference_fna: "GENOME_PATH/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna"
+
+  raw_fastq: "FASTQ/{sample}_{replicate}_{read}.fastq.gz"
+
+  trimmed_fastq: "trimmed/{sample}_{replicate}_{read}.TRIMMED.fastq.gz"
+  unpaired_fastq: "trimmed/{sample}_{replicate}_{read}.unpaired.fastq.gz"
+  trimlog: "trimmed/{sample}_{replicate}_trimlog"
+
+  aligned_bam: "BAMs/{sample}_{replicate}.bam"
+
+  sorted_bam: "sorted/{sample}_{replicate}_{sorting}.bam"
+
+urls:
+  data: "http://www.starklab.org/data/arnold_science_2013/\
+         {sample}_STARRseq_rep{replicate}_{read}.fastq.gz"
+  reference: "ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/215/\
+              GCF_000001215.4_Release_6_plus_ISO1_MT/\
+              GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna.gz"
+
+# placing containers here makes it easy to change versions if needed
+# if you want multiple versions just specify in the variable name as well
+containers:
+  trimmomatic: "docker://quay.io/biocontainers/trimmomatic:0.39--0"
+  bwa: "docker://biocontainers/bwa:v0.7.17-3-deb_cv1"
+  samtools: "docker://biocontainers/samtools:v1.3_cv3"
+
+# also include any command line options a user may want to change
+# the '>-' will concatenate lines with spaces between
+trimmomatic_options: >-
+  ILLUMINACLIP:/usr/local/share/trimmomatic-0.39-0/adapters/NexteraPE-PE.fa:1:30:7
+  SLIDINGWINDOW:4:15
+  MINLEN:20

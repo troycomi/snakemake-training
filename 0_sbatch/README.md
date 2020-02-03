@@ -1,11 +1,16 @@
 # SBATCH scripts
 
-These are the starting workflow files. The order of execution is dictated by the
-user, who should follow them in order.  There are several positive aspects of
-each file including well documented names and versions of software, but all 
-filenames are hard coded into the scripts.  While software versions are
-specified in the comments, it's up to the user to actually ensure they are
-installed and the correct version.  
+These are the starting workflow files.  They contain a common series of steps
+in a bioinformatics pipeline.  Namely downloading files, removing sequencing
+tags (trimming), aligning to a reference sequence, and sorting the aligned
+sequences for additional analyses.
+
+The order of execution is dictated by the user, who should follow them in
+numerical order.  There are several positive aspects of each file including
+well documented names and versions of software, but all filenames are hard
+coded into the scripts.  While software versions are specified in the comments,
+it's up to the user to actually ensure they are installed with the correct
+version.  
 
 Our goal will be to replace these files with a Snakemake workflow which will
 scale to many samples, handle versions and software through singularity and

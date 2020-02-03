@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=Dmel_trim     # create a short name for your job
+#SBATCH --job-name=trim     # create a short name for your job
 #SBATCH --nodes=1                # node count
 #SBATCH --ntasks=1               # total number of tasks across all nodes
 #SBATCH --cpus-per-task=4        # cpu-cores per task (>1 if multi-threaded tasks)
@@ -23,7 +23,7 @@ java -Xmx8000m \
         trimmed/SAMPLE_ID_1.unpaired.fastq.gz \
         trimmed/SAMPLE_ID_2.TRIMMED.fastq.gz \
         trimmed/SAMPLE_ID_2.unpaired.fastq.gz \
-        ILLUMINACLIP:ADAPTER_PATH/adapters.fa:1:30:7 \
+        ILLUMINACLIP:ADAPTER_PATH/NexteraPE-PE.fa:1:30:7 \
         SLIDINGWINDOW:4:15 \
         MINLEN:20
 

@@ -1,0 +1,188 @@
+# snakefiles are "marked up" python code
+
+# 1) import any extra scripts or libraries
+# this loads the config yaml and generates a dictionary, config
+configfile: 'config.yaml'
+# I like to set this as a separate variable because I use it a lot
+paths = config['paths']
+# set working directory from config 
+workdir: paths['working_dir']
+
+# 2) find all input files:
+samples = config['samples']
+replicates = config['replicates']
+sorting = config['sorting']
+
+# 3) build final output
+
+localrules:
+    all,
+    download_data,
+    download_reference,
+
+# 4) create rule "all" for default (final) outputs
+rule all:
+    input:
+        expand(paths['sorted_bam'],
+                sample=samples,
+                replicate=replicates,
+                sorting=sorting)
+
+# 5) build rules following pipeline with input functions above as needed
+# download data and keep only the first 1000 reads
+rule download_data:
+    output:
+        paths['raw_fastq']
+
+    params:
+        url=config['urls']['data']
+
+    shell:
+        'set +euo pipefail \n'
+        'wget -q -O - {params.url} | '
+        'zcat | head -n 4000 | gzip > {output} \n'
+        'echo'
+
+rule download_reference:
+    output:
+        paths['reference_fna']
+
+    shell:
+        'wget -q -O - {config[urls][reference]} | gunzip -c > {output}'
+        # NOTE in shell directives we don't use quotes in format braces
+
+rule index_reference:
+    input:
+        paths['reference_fna']
+
+    output:
+        f'{paths["reference_fna"]}.fai'
+        # NOTE in normal python syntax we DO need quotes
+
+    singularity: config['containers']['samtools']
+
+    threads: 1
+
+    resources:
+        mem=1000,  # MB
+        time=10,  # minutes
+        short_jobs=1  # <= 61 minutes
+
+    shell:
+        'samtools faidx {input}'
+
+rule bwa_index:
+    input:
+        reference=paths['reference_fna'],
+        index=f'{paths["reference_fna"]}.fai',
+
+    output:
+        [f'{paths["reference_fna"]}.{ext}'
+            for ext in 'bwt pac ann amb sa'.split()]
+
+    singularity: config['containers']['bwa']
+
+    threads: 1
+
+    resources:
+        mem=2000,  # MB
+        time=20,  # minutes
+        short_jobs=1
+
+    shell:
+        'bwa index -a bwtsw {input.reference}'
+
+class partial_dict(dict):
+    def __missing__(self, key):
+        return '{' + key + '}'
+
+# parital format of wildcards
+def pformat(string, **args):
+    return string.format_map(partial_dict(args))
+
+rule trim:
+    input:
+        expand(paths['raw_fastq'], read=(1, 2), allow_missing=True)
+        # setting allow_missing will keep other wildcards unformatted
+
+    output:
+        trim_1=pformat(paths['trimmed_fastq'], read=1),
+        trim_2=pformat(paths['trimmed_fastq'], read=2),
+        unpaired_1=pformat(paths['unpaired_fastq'], read=1),
+        unpaired_2=pformat(paths['unpaired_fastq'], read=2),
+        trimlog=paths['trimlog']
+
+    singularity: config['containers']['trimmomatic']
+
+    threads: 4
+
+    resources:
+        mem=8000,  # MB
+        time=90,  # minutes
+
+    shell:
+        'java -Xmx{resources.mem}m '  # NOTE
+            '-jar /usr/local/share/trimmomatic-0.39-0/trimmomatic.jar '
+            'PE '
+            '-threads {threads} '  # NOTE
+            '-trimlog {output[trimlog]} '
+            '-phred33 '
+            '{input} '
+            '{output[trim_1]} '
+            '{output[unpaired_1]} '
+            '{output[trim_2]} '
+            '{output[unpaired_2]} '
+            '{config[trimmomatic_options]}'
+
+rule bwa:
+    input:
+        reference=paths['reference_fna'],
+        index=f'{paths["reference_fna"]}.bwt',
+        fastq1=pformat(paths['trimmed_fastq'], read=1),
+        fastq2=pformat(paths['trimmed_fastq'], read=2),
+
+    output:
+        paths['aligned_bam']
+
+    singularity: config['containers']['bwa']
+
+    threads: 4
+
+    resources:
+        mem=4000,  # MB
+        time=120,  # minutes
+
+    shell:
+        'bwa mem '
+            '-M -t {threads} '
+            '{input.reference} '
+            '{input.fastq1} '
+            '{input.fastq2} '
+            '> {output}'
+
+def sorting_arg(wildcards):
+    if wildcards.sorting == 'nsorted':
+        return '-n'
+    return ''
+
+rule sort_bam:
+    input:
+        paths['aligned_bam']
+
+    output:
+        paths['sorted_bam']
+
+    params:
+        sorting=sorting_arg
+
+    singularity: config['containers']['samtools']
+
+    threads: 1
+
+    resources:
+        mem=2000,  # MB
+        time=30,  # minutes
+        short_jobs=1
+
+    shell:
+        'samtools sort {params.sorting} {input} > {output}'

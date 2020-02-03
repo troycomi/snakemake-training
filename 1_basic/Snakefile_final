@@ -105,7 +105,23 @@ rule trim:
             'MINLEN:20'
 
 rule bwa:
-    # TODO fill in this rule
+    # using bwa version 0.7.17-3
+    input:
+        reference='GENOME_PATH/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna',
+        index='GENOME_PATH/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna.bwt',
+        fastq1='trimmed/SAMPLE_ID_1.TRIMMED.fastq.gz',
+        fastq2='trimmed/SAMPLE_ID_2.TRIMMED.fastq.gz',
+
+    output:
+        'BAMs/SAMPLE_ID.bam'
+
+    shell:
+        'bwa mem '
+            '-M -t 4 '
+            '{input.reference} '
+            '{input.fastq1} '
+            '{input.fastq2} '
+            '> {output}'
 
 rule sort_bam:
     # using samtools version 1.3

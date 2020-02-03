@@ -1,0 +1,152 @@
+# snakefiles are "marked up" python code
+
+# 1) import any extra scripts or libraries
+
+# 2) find all input files:
+samples = ['S2']
+replicates = ['1', '2']
+sorting = ['csorted', 'nsorted']
+
+# 3) build final output
+
+# 4) create rule "all" for default (final) outputs
+rule all:
+    input:
+        expand('sorted/{sample}_{replicate}_{sorting}.bam',
+                sample=samples,
+                replicate=replicates,
+                sorting=sorting)
+        # expand is a snakemake util that, by default, generates the product
+        # of all supplied wildcard iterators
+
+# 5) build rules following pipeline with input functions above as needed
+# we will replace these with a config later
+base_url = ('http://www.starklab.org/data/arnold_science_2013/'
+            '{sample}_STARRseq_rep{replicate}_{read}.fastq.gz')
+ref_url = ('ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/215/'
+        'GCF_000001215.4_Release_6_plus_ISO1_MT/'
+        'GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna.gz')
+reference = 'GENOME_PATH/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna'
+
+# download data and keep only the first 1000 reads
+rule download_data:
+    output:
+        'FASTQ/{sample}_{replicate}_{read}.fastq.gz',
+
+    params:
+        url=base_url
+
+    shell:
+        'set +euo pipefail \n'
+        'wget -q -O - {params.url} | '
+        'zcat | head -n 4000 | gzip > {output} \n'
+        'echo'
+
+rule download_reference:
+    output:
+        reference
+
+    shell:
+        'wget -q -O - {ref_url} | gunzip -c > {output}'
+
+rule index_reference:
+    input:
+        reference
+
+    output:
+        f'{reference}.fai'
+
+    singularity: 'docker://biocontainers/samtools:v1.3_cv3'
+
+    shell:
+        'samtools faidx {input}'
+
+rule bwa_index:
+    input:
+        reference=reference,
+        index=f'{reference}.fai',
+
+    output:
+        [f'{reference}.{ext}' for ext in 'bwt pac ann amb sa'.split()]
+
+    singularity: 'docker://biocontainers/bwa:v0.7.17-3-deb_cv1'
+
+    shell:
+        'bwa index -a bwtsw {input.reference}'
+
+rule trim:
+    input:
+        'FASTQ/{file}_1.fastq.gz',
+        'FASTQ/{file}_2.fastq.gz',
+
+    output:  # or with names, acces like output[trim_1]
+        trim_1='trimmed/{file}_1.TRIMMED.fastq.gz',
+        trim_2='trimmed/{file}_2.TRIMMED.fastq.gz',
+        unpaired_1='trimmed/{file}_1.unpaired.fastq.gz',
+        unpaired_2='trimmed/{file}_2.unpaired.fastq.gz',
+        trimlog='trimmed/{file}_trimlog'
+
+    singularity: 'docker://quay.io/biocontainers/trimmomatic:0.39--0'
+
+    shell:
+        'java -Xmx8000m '
+            '-jar /usr/local/share/trimmomatic-0.39-0/trimmomatic.jar '
+            'PE '
+            '-threads 4 '
+            '-trimlog {output[trimlog]} '
+            '-phred33 '
+            '{input} '
+            '{output[trim_1]} '
+            '{output[unpaired_1]} '
+            '{output[trim_2]} '
+            '{output[unpaired_2]} '
+            'ILLUMINACLIP:/usr/local/share/trimmomatic-0.39-0/adapters/NexteraPE-PE.fa:1:30:7 '
+            'SLIDINGWINDOW:4:15 '
+            'MINLEN:20'
+
+rule bwa:
+    input:
+        reference='GENOME_PATH/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna',
+        index='GENOME_PATH/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna.bwt',
+        fastq1='trimmed/{file}_1.TRIMMED.fastq.gz',
+        fastq2='trimmed/{file}_2.TRIMMED.fastq.gz',
+
+    output:
+        'BAMs/{file}.bam'
+
+    singularity: 'docker://biocontainers/bwa:v0.7.17-3-deb_cv1'
+
+    shell:
+        'bwa mem '
+            '-M -t 4 '
+            '{input.reference} '
+            '{input.fastq1} '
+            '{input.fastq2} '
+            '> {output}'
+
+def sorting_arg(wildcards):
+    if wildcards.sorting == 'nsorted':
+        return '-n'
+    return ''
+
+rule sort_bam:
+    input:
+        'BAMs/{file}.bam'
+
+    output:
+        'sorted/{file}_{sorting}.bam',
+        # NOTE if we don't place sorted outputs in another directory
+        # we get an ambiguous wildcard.
+        # BAMs/SAMPLE_csorted.bam could be
+        # BAMS/{ file       }.bam or
+        # BAMS/{file}_{sorting}.bam
+        # There are several ways to fix this, but separate directories are
+        # usually cleanest
+
+    params:
+        sorting=sorting_arg
+
+    singularity: 'docker://biocontainers/samtools:v1.3_cv3'
+
+    shell:
+        'samtools sort {params.sorting} {input} > {output}'
