@@ -1,6 +1,5 @@
 # Wildcards
 
-## Overview
 Wildcards are a powerful but somewhat complex aspect of snakemake.  The general
 format is specifying a filename with some format tokens which are interpreted
 as wildcards, similar to shell glob wildcards.  For example, if you wanted all the
@@ -44,7 +43,18 @@ rule sort:
     shell: 'sort abc.unsorted.txt > abc.sorted.txt'
 ```
 At this point, if abc.unsorted.txt didn't exist, the process starts again
-or if no rules satisfy an exception is raised.
+or, if no rules output the file, an exception is raised.
+
+Another limitation is that all outputs must contain the same wildcards.  The
+following wouldn't be allowed:
+```python
+rule process:
+    output:
+        'process_{sample}_{read}.txt',
+        'log_{sample}.txt'
+```
+Several sample, read pairs would be writing to the same log.  Snakemake raises
+an error in this case as an output file is not uniquely determined.
 
 ## Wildcards for building outputs
 Since snakemake evaluates the workflow 'backwards', it is initially challenging
@@ -84,6 +94,10 @@ rule all:
 Now if we add more files to our directory, the targets will be automatically
 built!
 
+## Exercise 4
+Why can't we use `glob_wildcards` in this example workflow? Can you think of
+how to get all the sample names?
+
 ## Ambiguous rules
 Recall in our last Snakefile, we had bwa output to `BAMs/SAMPLE_ID.bam` and
 sort\_bam output `BAMs/SAMPLE_ID_csorted.bam`.  Replacing the SAMPLE ID with
@@ -91,7 +105,7 @@ a wildcard, we have:
 ```python
 rule bwa:
     output: 'BAMs/{sample}.bam'
-    ...
+    # ...
 rule sort_bam:
     input: 'BAMs/{sample}.bam'
     output: 'BAMS/{sample}_csorted.bam'
@@ -122,9 +136,9 @@ rule download_data:
 ```
 but how do we get the url?  We don't want to set it as input since that would
 cause a missing input exception during DAG building.  We need to use another
-directive, `params`.  Params are additional string inputs to rules.  Because
-output wildcards are always evaluated first, we can use the same wildcards
-in our url param:
+directive, `params`.  Params are additional, non-file, string inputs to rules.
+Because output wildcards are always evaluated first, we can use the same
+wildcards in our url param:
 ```python
     params:
         url='/{sample}_STARRseq_rep{replicate}_{read}.fastq.gz'
@@ -190,7 +204,7 @@ if it is no longer needed.
 Input functions can be any function, but most often I use them to aggregate
 files or select a value from a dictionary.
 
-## Exercise 4
+## Exercise 5
 Replace the hard coded input and output files of the bwa rule with wildcards.
 Try running with `snakemake -nq` to make sure you have valid syntax and all
-inputs can be found.  Compare with `Snakemake_final`
+inputs can be found.  Compare with `Snakemake_final`.

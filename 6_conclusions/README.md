@@ -2,7 +2,7 @@
 
 I hope you have an understanding of snakemake and can convert your shell scripts
 into reproducible snakefiles.  While we have covered a lot, there are several
-advanced topics that are occasionally helpful we didn't have time for:
+advanced topics that are helpful we didn't have time for:
 - [Priorities](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#priorities)
 - [Jupyter integration](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#jupyter-notebook-integration)
 - [Protected, temporary, ancient, directory flags](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#protected-and-temporary-files)
@@ -12,7 +12,7 @@ advanced topics that are occasionally helpful we didn't have time for:
 
 I highly recommend reading through the
 [rules documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html),
-I always learn something new when I look there.
+I always learn something new from that page.
 
 Developers are also activate on
 [github](https://github.com/snakemake/snakemake) and 

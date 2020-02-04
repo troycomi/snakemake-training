@@ -45,9 +45,10 @@ in the snakemake working directory.  If you specify a workflow with relative
 paths, this will lead to needless duplication of distributions!  Instead,
 specify the location, either with `shadow-prefix` for the entire `.snakemake`
 directory or with `conda-prefix` and `singularity-prefix` for just environments.
+We will add these to our profile later.
 
 ## Singularity directives
-Let's convert the recommended versions in comments to a singularity directive.
+Let's convert the recommended versions in comments to singularity directives.
 
 If you search for 'samtools docker' you should find a link to docker hub
 from [biocontainers](https://hub.docker.com/r/biocontainers/samtools/).
@@ -57,7 +58,8 @@ we are specifically looking for version 1.3, let's look at the
 From there, we can find the docker pull command:
 `docker pull biocontainers/samtools:v1.3_cv3`.
 *Even if you want the latest version, I highly recommend setting to the latest
-version!* That way you control when an updated version of software gets used.
+version!* That way you control when an updated version of software gets used
+in your analysis.
 
 To convert the pull command to a singularity url, prepend `docker://` to the
 container name.  Within the Snakefile, we add the singularity directive to
@@ -91,7 +93,8 @@ limitation and shouldn't be the case for larger projects.
 
 ## Conda directives
 Conda works similarly, except you provide the path to a
-[conda environment file](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#sharing-an-environment).  Be sure to include the yaml file in your repository so it travels with
+[conda environment file](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#sharing-an-environment).
+Be sure to include the yaml file in your repository so it travels with
 the Snakefile.  We aren't using conda here, but it is very convenient to
 swap between versions of python or install several R dependencies within a
 pipeline.
@@ -140,7 +143,7 @@ It should take about 3 minutes to complete and produce the following file tree:
 ```
 
 If you try to run the workflow again, snakemake will report that nothing
-needs to be done because the final target (sorted bams) already exist.
+needs to be done because the final targets (sorted bams) already exist.
 
 ## The .snakemake directory
 Let's take a look into the hidden `.snakemake` directory in testing:
@@ -176,12 +179,16 @@ Let's take a look into the hidden `.snakemake` directory in testing:
     └── 530277b0d7b8d64ee049c9c7a2b65e6b.simg
 ```
 
-Snakemake generates several files at each execution used for persistence between
-execution.  The log contains all the output printed to terminal.  Metadata
-is created for each output file and contains information on the modification
-time, dependent files, and other information used when deciding if a file
-needs to be created.  Singularity has all the singularity images.  If you want
-to poke inside an image you can use `singularity shell <image name>.simg`.
+Snakemake generates several files used for persistence between executions. 
+The log contains all the output printed to terminal.  Metadata is created for
+each output file and contains encoded data on the modification time, dependent
+files, and other information used when deciding if a file needs to be created.
+Singularity has all the singularity images.  If you want to poke inside an
+image you can use `singularity shell <image name>.simg`.  The image names are
+hex digests of the singularity container contents.  If we used a conda
+directive, the conda environments would be in the conda folder, again encoded
+as hex digests of the conda yaml contents.  If you change the yaml file, a new
+environment will be created.
 
 Mostly you should know that a lot of files can be produced for larger runs and
 the logs can end up taking up a lot of space.  As long as no instance of

@@ -135,6 +135,8 @@ rule trim:
             '{config[trimmomatic_options]}'
 
 rule bwa:
+    # TODO replace the input, output and singularity directives with values
+    # from config
     input:
         reference='GENOME_PATH/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna',
         index='GENOME_PATH/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna.bwt',

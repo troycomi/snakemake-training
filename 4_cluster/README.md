@@ -12,6 +12,12 @@ shell script) or those requiring a network connection (downloading data).
 
 Any rules specified by name with the localrules directive will run with the
 main instance of snakemake instead of being executed through the cluster command.
+```
+localrules:
+    all,
+    download_data,
+    download_reference,
+```
 
 ## Resources and threads
 Resources in snakemake come in two flavors, one specifying hardware constraints
@@ -22,7 +28,7 @@ to specify are time, memory and number of CPUs.
 ### Threads
 CPUs are treated differently and have a dedicated directive `threads`.
 We will use this value as input to sbatch as the `cpus-per-task` option.
-It is specified as a number and can be used in the shell command:
+It is specified as an integer and can be used in the shell command:
 ```python
 rule trim:
     ...
@@ -39,8 +45,8 @@ default, snakemake will try to use all cores on a machine for running rules.
 You can constrain that with the -c option.  If my machine has 4 cores, snakemake
 will run as many jobs as possible until all 4 cores are used.  While I could
 sort 4 bams at once (each with one thread) I could only perform one trim at a
-time.  If I specify only 2 cores, trim will still run, but now threads has the
-value of 2, which is passed to trimmomatic.
+time.  If I specify only 2 cores, trim will still run, but now `{threads}` has
+the value of 2, which is passed to trimmomatic.
 
 If you are mostly concerned with cluster execution, just think of threads as
 how you specify the number of cpus for a job.  Threads will default to 1.
@@ -86,6 +92,13 @@ Here time is calculated as 10 minutes per GB of total input size.  If you allow
 multiple restart attempts, each additional attempt will request twice as long.
 This is a nice feature but is hard to get working well in practice.
 
+Resources will default to 0, which may be ok for logical resources but will
+cause an error on cluster execution.  You can set a default through the command
+line, but it's better practice to think about your resources, estimate them,
+and refine once you've executed a few samples.
+[Reportseff](https://github.com/troycomi/reportseff) can help quickly assess
+how well you are utilizing resources.
+
 ### Logical resources
 Custom resources can be anything, number of connections to a database, number
 of large temporary files to have at once, the total disk space, etc.  Here
@@ -101,8 +114,8 @@ are some applications I've used in the past:
   less than an hour will be released at once.  We will limit our total job
   submissions to 250 jobs.  If we don't let snakemake know about the short job
   limitation it may create 250 short jobs even though longer running jobs are
-  eligible, creating a bottleneck.  I frequently add in the `short_jobs`
-  resource to keep this from happening.
+  eligible, creating a bottleneck due to the slurm scheduler.  I frequently
+  add in the `short_jobs` resource to keep this from happening.
 
 Next, you have to tell snakemake how many of each resource is available.  This
 uses the `resources` option and takes a list of `NAME=VALUE` pairs.  For
@@ -112,7 +125,7 @@ snakemake --resource wget_connections=5
 ```
 This constraint will be considered during execution of the workflow.
 
-## Exercise 5
+## Exercise 6
 Add resources to the bwa rule.  If you aren't sure what values to use, you can
 start with those in the original sbatch script.  Don't forget threads and be
 sure to update the command!
@@ -191,12 +204,14 @@ snakemake --profile /path/to/princeton_rc
 Again, you can use this same command to run all of your workflows with a slurm
 scheduler.
 
-## Exercise 6
+## Exercise 7
 Remove the BAMs, FASTQ and trimmed directories and try running the workflow
 again with the slurm profile:
 ```
+# in snakemake-trainging/testing
 mkdir slurm_out
 snakemake --profile ../princeton_rc
 ```
 Monitor the slurm queue (`squeue -u $USER -i 5`),
-slurm\_out (`watch -n 5 'ls -lh *'`), and the snakemake output using tmux.
+slurm\_out (`watch -n 5 'ls -lh *'`), and the snakemake output using tmux,
+or just watch the snakemake output.

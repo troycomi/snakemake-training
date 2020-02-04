@@ -8,7 +8,7 @@ are not enforced.
 Snakemake adds declarative code to define rules describing how to create 
 output files from input files.  Similar to GNU make, snakemake determines
 which rules to execute in order to produce given targets.  With our example
-workflow, request or target the outputs of step 3.  Snakemake will determine
+workflow, we request or target the outputs of step 3, snakemake will determine
 all steps are required and run them in order.
 
 Unlike GNU make, snakemake is much easier to read and follows pythonic syntax.

@@ -48,24 +48,24 @@ rule download_reference:
 ```
 The first line tells snakemake where to find the config file, which causes
 it to load the values into the `config` dictionary.  Because I use paths more
-than any other value, I usually set it to paths.  A point of confusion is that
+than any other value, I usually set it to `paths`.  A point of confusion is that
 config keys do not need quotes within a shell directive,
 `{config[urls][reference]}` above.  This is because snakemake does additional
 processing to the string before making a shell script and is similar to using
 named lists for input/output.  When outside of that context or when using
 python f-strings, you DO need quotes, `paths['reference_fna']` above.
 
-## Exercise 7
+## Exercise 8
 Replace the input, output, and singularity directives of the bwa rule with
 values from paths and config.  Use `snakemake -nq` to check if there are
 errors parsing the Snakefile.  Check the `Snakemake_final` to compare.
 
-## Exercise 8
+## Exercise 9
 In preparation for publication, you decide that all directory names should be
 upper case. Where do you need to make changes? Capitalize trimmed and sorted,
 then run `snakemake -nq`, how many jobs are required and is it what you expect?
 
-## Exercise 9
+## Exercise 10
 You no longer care about nsorted output or replicate 1.  How do you change the
 config yaml?
 
@@ -75,7 +75,7 @@ configfile directives or through the `configfile` option on the command line.
 If you just want to modify one or a few values, you can also set values with
 the `config` option.  Values in the config object are set in order and will
 overwrite each other.  Consider this situation, each yaml has a variable 
-test with a value equal to the number in the yaml file, e.g. config2.yaml
+'test' with a value equal to the number in the yaml file, e.g. config2.yaml
 has `test: 2`
 ```python
 # Snakefile
@@ -101,12 +101,12 @@ depending on how options are parsed.  Don't do this!
 Generally:
 - Fewer config files are better than more.  If you must split your config
   be certain you have no overlapping keys or be careful when you load.  Load
-  config files in one way.
+  config files in one way (e.g. only in the Snakefile).
 - Don't use the config option.  It is hard to document a command line option
   so your work will be harder to replicate.
 - While your config paths may not matter for reproducibility, the options and
   version numbers certainly do!  It's important to keep a record of what was
-  run and your snakefile and config file can do that!
+  run and your snakefile and config file (together) can do that.
 
 With version control, I can think of two valid schemes for keeping
 configuration and Snakefiles organized with data.

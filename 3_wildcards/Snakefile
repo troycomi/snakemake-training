@@ -105,6 +105,7 @@ rule trim:
             'MINLEN:20'
 
 rule bwa:
+    # TODO replace input and outputs with wildcards
     input:
         reference='GENOME_PATH/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna',
         index='GENOME_PATH/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna.bwt',
