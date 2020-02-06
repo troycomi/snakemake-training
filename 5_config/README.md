@@ -20,7 +20,7 @@ the local file system directories.  A `containers` entry is also good to
 keep all software versions together.  If you have several options for a command
 you can also make the command an entry with each option name as a key-value.
 
-Here's the first few lines of the config.yaml
+Here are the first few lines of the config.yaml
 ```yaml
 paths:
   reference_fna: "GENOME_PATH/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna"
@@ -60,6 +60,43 @@ Replace the input, output, and singularity directives of the bwa rule with
 values from paths and config.  Use `snakemake -nq` to check if there are
 errors parsing the Snakefile.  Check the `Snakemake_final` to compare.
 
+## Partial formatting
+In the last exercise, you probably experienced trying to partially format
+a wildcard with some specific values.  Namely, how do you convert
+```python
+  "FASTQ/{sample}_{replicate}_{read}.fastq.gz"
+  # into
+  "FASTQ/{sample}_{replicate}_1.fastq.gz"
+  # ?
+```
+There are several options when dealing with strings in python:
+```python
+"FASTQ/{sample}_{replicate}_{read}.fastq.gz".replace('{read}', 1)
+# hard to work with additional wildcards
+"FASTQ/{{sample}}_{{replicate}}_{read}.fastq.gz".format(read=1)
+# hard to work with config
+"FASTQ/{sample}_{replicate}_%s.fastq.gz" % "1"
+# doesn't work with wildcards or config
+
+class partial_dict(dict):
+    def __missing__(self, key):
+        return '{' + key + '}'
+"FASTQ/{{sample}}_{{replicate}}_{read}.fastq.gz".format_map(partial_dict(read=1))
+# overkill usually
+```
+There is a keyword argument to expand with allows missing wildcards as well
+```python
+expand("FASTQ/{{sample}}_{{replicate}}_{read}.fastq.gz",
+       read=1, allow_missing=True)
+```
+which is what I've added in the Snakefile in the helper method `pformat`
+```python
+def pformat(string, **args):
+    return expand(string, **args, allow_missing=True)
+
+pformat("FASTQ/{{sample}}_{{replicate}}_{read}.fastq.gz", read=1)
+```
+
 ## Exercise 9
 In preparation for publication, you decide that all directory names should be
 upper case. Where do you need to make changes? Capitalize trimmed and sorted,
@@ -67,7 +104,7 @@ then run `snakemake -nq`, how many jobs are required and is it what you expect?
 
 ## Exercise 10
 You no longer care about nsorted output or replicate 1.  How do you change the
-config yaml?
+config yaml?  Recheck the number of jobs.
 
 ## More config files
 You can have multiple configuration files, either by providing additional
@@ -113,13 +150,12 @@ configuration and Snakefiles organized with data.
 1. Single config file specified in the Snakefile.  Invoke with just the profile
    option and commit to your VCS.  Tag the commit with the date and any other
    important identifying information.  When you need to see how a file was made,
-   go back to VCS log and checkout the correct version.  Update or remove tags
-   that you don't keep/use.
+   go back to the VCS log and checkout the correct version.  Update or remove
+   tags that you don't keep/use.
 2. Multiple config files.  Before running the pipeline, commit to VCS and
    record the hash either in the config file or as the config file's name.
    Move config file to the working directory and run snakemake with the profile
    and config file options.  If you remake a directory, also remove the config.
 
 In simple workflows with a single config and Snakefile, either will work.  When
-you incorporate subworkflows and multiple config files only option 1 may be
-viable.
+you incorporate subworkflows and multiple config files only option 1 is viable.

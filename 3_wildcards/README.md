@@ -2,8 +2,8 @@
 
 Wildcards are a powerful but somewhat complex aspect of snakemake.  The general
 format is specifying a filename with some format tokens which are interpreted
-as wildcards, similar to shell glob wildcards.  For example, if you wanted all the
-.txt files in the current directory using bash, you could use
+as wildcards, similar to shell glob wildcards.  For example, if you wanted all
+the .txt files in the current directory using bash, you could use
 ```shell
 *.txt
 ```
@@ -92,7 +92,8 @@ rule all:
     input: outputs
 ```
 Now if we add more files to our directory, the targets will be automatically
-built!
+built!  Remember, you request all of the **outputs** of your workflow in the
+rule all.
 
 ## Exercise 4
 Why can't we use `glob_wildcards` in this example workflow? Can you think of
@@ -150,17 +151,18 @@ we can use another wildcard for the input to the trim rule:
         'FASTQ/{file}_1.fastq.gz',
         'FASTQ/{file}_2.fastq.gz',
 ```
-Now `{file}` will match what was `{sample}_{replicate}`.  While you can (and I
-do this here), switching wildcard names will generally make your workflow
-harder to follow.
+Now `{file}` will match what was `{sample}_{replicate}`.  It can be
+advantageous because now the rule will match any fastq file pair and could be
+used in other workflows.  While you can (and I do this here), switching
+wildcard names will generally make your workflow harder to follow.
 
 ## Input functions
-Frequently you will have to do more than format a string based on your wildcards.
-Let's say we had several reference genomes that we wanted to select based on
-the sample name.  One way to do this is through input functions.  These are
-python functions that take wildcards as arguments.  Input functions can also
-be used in other directives and can take additional arguments like inputs,
-outputs, and attempt.  
+Frequently you will have to do more than format a string based on your
+wildcards.  Let's say we had several reference genomes that we wanted to select
+based on the sample name.  One way to do this is through input functions.
+These are python functions that take wildcards as arguments.  Input functions
+can also be used in other directives and can take additional arguments like
+inputs, outputs, and attempt.  
 
 Looking at our sort\_bam command, we see two nearly identical commands to build
 the two sorted outputs
@@ -173,7 +175,7 @@ the two sorted outputs
         'samtools sort {input} > {output.csort} \n'
         'samtools sort -n {input} > {output.nsort}'
 ```
-let's change that to take an input function as a parameter to decide if the
+Let's change that to take an input function as a parameter to decide if the
 '-n' flag should be added.  First, the output with wildcards is
 ```python
     output:
@@ -208,3 +210,6 @@ files or select a value from a dictionary.
 Replace the hard coded input and output files of the bwa rule with wildcards.
 Try running with `snakemake -nq` to make sure you have valid syntax and all
 inputs can be found.  Compare with `Snakemake_final`.
+
+In the testing directory, run `snakemake -s ../3_wildcards.Snakefile -nq`.  Do
+the planned jobs and counts make sense to you?

@@ -6,9 +6,10 @@ specifying resources. Once that is done we can quickly switch schedulers,
 move to the cloud, or run on our laptops.
 
 ## localrules
-Once we enable cluster execution, all rules will be submitted as jobs.  You
-may not want all rules submitted, especially quick rules (like all or a small
-shell script) or those requiring a network connection (downloading data).
+Once we enable cluster execution, all rules will be submitted as jobs by
+default.  You may not want all rules submitted, especially quick rules (like
+all or a small shell script) or those requiring a network connection
+(downloading data).
 
 Any rules specified by name with the localrules directive will run with the
 main instance of snakemake instead of being executed through the cluster command.
@@ -31,7 +32,7 @@ We will use this value as input to sbatch as the `cpus-per-task` option.
 It is specified as an integer and can be used in the shell command:
 ```python
 rule trim:
-    ...
+    # ...
     threads: 4
 
     shell:
@@ -39,14 +40,15 @@ rule trim:
             '-jar /usr/local/share/trimmomatic-0.39-0/trimmomatic.jar '
             'PE '
             '-threads {threads} '
+    # ...
 ```
 Threads is special because it also has implications for local execution.  By
 default, snakemake will try to use all cores on a machine for running rules.
-You can constrain that with the -c option.  If my machine has 4 cores, snakemake
-will run as many jobs as possible until all 4 cores are used.  While I could
-sort 4 bams at once (each with one thread) I could only perform one trim at a
-time.  If I specify only 2 cores, trim will still run, but now `{threads}` has
-the value of 2, which is passed to trimmomatic.
+You can constrain that with the -c or -j option.  If my machine has 4 cores,
+snakemake will run as many jobs as possible until all 4 cores are used.  While
+I could sort 4 bams at once (each with one thread) I could only perform one
+trim at a time.  If I specify only 2 cores, trim will still run, but now
+`{threads}` has the value of 2, which is passed to trimmomatic.
 
 If you are mostly concerned with cluster execution, just think of threads as
 how you specify the number of cpus for a job.  Threads will default to 1.
@@ -63,10 +65,11 @@ Resources are specified as a directive and can be referenced in the shell
 command like so:
 ```python
 rule trim:
-...
+# ...
     resources:
         mem=8000,  # MB
         time=90,  # minutes
+        # or time=2*24*60  # 2 days
 
     shell:
         'java -Xmx{resources.mem}m '
@@ -85,8 +88,7 @@ def estimate_time(inputs, attempt):
 rule something:
     ...
     resources:
-        time=lambda wildcards, input, attempt: estimate_time(
-            input, attempt)
+        time=lambda wildcards, input, attempt: estimate_time(input, attempt)
 ```
 Here time is calculated as 10 minutes per GB of total input size.  If you allow
 multiple restart attempts, each additional attempt will request twice as long.
@@ -100,7 +102,7 @@ and refine once you've executed a few samples.
 how well you are utilizing resources.
 
 ### Logical resources
-Custom resources can be anything, number of connections to a database, number
+Custom resources can be anything: number of connections to a database, number
 of large temporary files to have at once, the total disk space, etc.  Here
 are some applications I've used in the past:
 - Limit large files.  One step in my workflow required generating large,
@@ -123,7 +125,8 @@ example, if I only want 5 wget connections at once, I call
 ```shell
 snakemake --resource wget_connections=5
 ```
-This constraint will be considered during execution of the workflow.
+This constraint will be considered during execution of the workflow.  If a
+resource isn't specified in a rule, its value is set to 0 by default.
 
 ## Exercise 6
 Add resources to the bwa rule.  If you aren't sure what values to use, you can
@@ -210,8 +213,12 @@ again with the slurm profile:
 ```
 # in snakemake-trainging/testing
 mkdir slurm_out
-snakemake --profile ../princeton_rc
+snakemake --profile ../princeton_rc -s ../4_cluster/Snakefile
 ```
 Monitor the slurm queue (`squeue -u $USER -i 5`),
-slurm\_out (`watch -n 5 'ls -lh *'`), and the snakemake output using tmux,
+slurm\_out (`watch -n 5 'ls -lh'`), and the snakemake output using tmux,
 or just watch the snakemake output.
+
+If you have reportseff installed
+(`pip install git+https://github.com/troycomi/reportseff`)
+check the efficiency with `reportseff` in the slurm\_out directory

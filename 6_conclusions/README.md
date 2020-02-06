@@ -9,6 +9,7 @@ advanced topics that are helpful we didn't have time for:
 - [Rule dependencies](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#rule-dependencies)
 - [Grouped and piped rules](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#defining-groups-for-execution)
 - [Checkpoints](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#data-dependent-conditional-execution)
+- [Environment Modules](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#using-environment-modules)
 
 I highly recommend reading through the
 [rules documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html),

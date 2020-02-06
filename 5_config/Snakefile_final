@@ -1,12 +1,13 @@
 # snakefiles are "marked up" python code
 
 # 1) import any extra scripts or libraries
+import os
 # this loads the config yaml and generates a dictionary, config
 configfile: 'config.yaml'
 # I like to set this as a separate variable because I use it a lot
 paths = config['paths']
 # set working directory from config 
-workdir: paths['working_dir']
+workdir: os.path.expanduser(paths['working_dir'])
 
 # 2) find all input files:
 samples = config['samples']
@@ -92,13 +93,9 @@ rule bwa_index:
     shell:
         'bwa index -a bwtsw {input.reference}'
 
-class partial_dict(dict):
-    def __missing__(self, key):
-        return '{' + key + '}'
-
 # parital format of wildcards
 def pformat(string, **args):
-    return string.format_map(partial_dict(args))
+    return expand(string, **args, allow_missing=True)
 
 rule trim:
     input:

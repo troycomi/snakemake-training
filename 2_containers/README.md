@@ -36,8 +36,8 @@ noticing!
 Containers and environments can only be built on the head node as they require
 network connections.  If you can't run the main snakemake instance on the head
 node, you can add the option `--create-envs-only` to just download containers.
-Running that first on the head node, will ensure they are available when run
-on worker nodes.
+Running that first on the head node, will ensure containers are available when
+subsequent runs are performed on worker nodes.
 
 All containers and environments are hashed and stored in unique, digested names
 based on their content.  If an environment file changes, a new environment is
@@ -64,8 +64,8 @@ version!* As of this writing, v1.9 is current, so I would use the container
 That way when an updated version of software comes out, I can decide if I want
 to update or keep the same version throughout my analysis.
 
-To convert the pull command to a singularity url, prepend `docker://` to the
-container name. So
+To convert the pull command from docker hub to a singularity url, add
+`docker://` to the front of container name. So
 ```shell
 docker pull biocontainers/samtools:v1.3_cv3
 # becomes
@@ -73,7 +73,7 @@ singularity: 'docker://biocontainers/samtools:v1.3_cv3'
 # in the snakefile
 ```
 We don't have to perform the pull ourselves, snakemake will make sure it is
-present before executing.
+present before executing if `use-singularity` is specified.
 
 Within the Snakefile, we add the singularity directive to the rule we want it
 applied to:
@@ -90,8 +90,9 @@ rule index_reference:
     shell:
         'samtools faidx {input}'
 ```
-Note the argument is a string and can be a variable.  Later we will move it to
-the config file.
+You can also specify an entire workflow to be run in a singularity container
+by placing the singularity directive outside of any rules.  Note the argument
+is a string and can be a variable.  Later we will move it to the config file.
 
 Hopefully that's the only change you need, but depending on the container you
 may have to alter your shell command.  For example, the rule `trim` uses a
@@ -101,7 +102,7 @@ java archive file which has to be located *within* the container.
     # becomes
     '-jar /usr/local/share/trimmomatic-0.39-0/trimmomatic.jar '
 ```
-With a different container that path would have to change.  This is a container
+With a different version, that path would have to change.  This is a container
 limitation and shouldn't be the case for larger projects.
 
 ## Conda directives

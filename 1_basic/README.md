@@ -53,7 +53,7 @@ string and perform substitutions of format tokens, similar to python 3 f-strings
 One consequence of this behavior is to get the `first_file` from above in a
 shell directive, you use `{input[first_file]}` without the quotes.
 
-Let's look at a rule to make a file with file1 concatenated with file2, and
+Let's look at a rule to make a sandwich with file1 concatenated with file2, and
 another copy of file1 at the end.  When we are done we want to delete file2
 from the file system.
 ```python
@@ -157,7 +157,7 @@ Copy over the command and replace files with `{input}` and `{output}` tokens.
 
 When you are done, check the output of `snakemake -nq` to ensure you have no
 syntax errors.  Then run `snakemake -np` to see what the command output is for
-the bwa rule.  Compare to Snakefile_final in this folder, did you get all
+the bwa rule.  Compare to `Snakefile_final` in this folder, did you get all
 four inputs? One is implicitly used by bwa but snakemake won't know to generate
 it if it's not an input!
 
