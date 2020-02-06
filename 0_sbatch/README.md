@@ -16,7 +16,8 @@ Our goal will be to replace these files with a Snakemake workflow which will
 scale to many samples, handle versions and software through singularity and
 conda, and automatically build necessary output files based on new inputs.
 Once we interface with slurm, we can capture all the SBATCH directives as
-well, keeping the resource values next to their rules.
+well, keeping the resource values (memory and time) next to the corresponding
+jobs.
 
 In contrast to accomplishing something similar with bash scripts and array
 jobs, Snakemake is much easier to read and write and can continue each step

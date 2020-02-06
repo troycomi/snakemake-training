@@ -6,10 +6,12 @@ are not enforced.
 
 ## Snakemake Basics
 Snakemake adds declarative code to define rules describing how to create 
-output files from input files.  Similar to GNU make, snakemake determines
-which rules to execute in order to produce given targets.  With our example
-workflow, we request or target the outputs of step 3, snakemake will determine
-all steps are required and run them in order.
+output files from input files.  Declarative code tells the computer what needs
+to be done instead of how to do something.  You describe the desired results
+instead of listing exactly how to generate them. Similar to GNU make,
+snakemake determines which rules to execute in order to produce given targets.
+With our example workflow, we request or target the outputs of step 3,
+snakemake will determine all steps are required and run them in order.
 
 Unlike GNU make, snakemake is much easier to read and follows pythonic syntax.
 It's easy to interface snakemake with large computation engines and handle
@@ -30,15 +32,17 @@ The input and output directives use a special list class which supports either
 list or dictionary syntax.  If you have two files as input, the following
 are both valid:
 ```python
-input:
-    'file1.txt',
-    'file2.txt'
+rule list_input:
+    input:
+        'file1.txt',
+        'file2.txt'
 ```
 
 ```python
-input:
-    first_file='file1.txt',
-    second_file='file2.txt',
+rule dictionary_input:
+    input:
+        first_file='file1.txt',
+        second_file='file2.txt',
 ```
 In the second example, `input['first_file']` and `input[0]` both refer to
 `file1.txt`.  Which syntax you use depends on the situation and what is
@@ -50,7 +54,8 @@ One consequence of this behavior is to get the `first_file` from above in a
 shell directive, you use `{input[first_file]}` without the quotes.
 
 Let's look at a rule to make a file with file1 concatenated with file2, and
-another copy of file1 at the end.  When we are done we want to delete file2.
+another copy of file1 at the end.  When we are done we want to delete file2
+from the file system.
 ```python
 rule sandwich:
     input:
@@ -66,15 +71,46 @@ rule sandwich:
             '> {output}\n'  # send to output
         'rm {input[second_file]}'
 ```
+Let's walk through the shell command processing step by step.  First,
+the format tokens will be replaced by their values.  If you just list
+`{input}` or `{output}` snakemake will list all values joined with a space.
+```python
+shell:
+    'cat file1.txt file2.txt '
+    #    ^ {input} expanded^
+        'file1.txt '
+        '> sandwich.txt\n'
+    'rm file2.txt'
+```
+Next, python treats the strings as though they are in a block and concatenates
+them together:
+```python
+shell:
+    'cat file1.txt file2.txt ''file1.txt ''> sandwich.txt\n''rm file2.txt'
+```
+And the adjacent single quotes are 'removed':
+```python
+shell:
+    'cat file1.txt file2.txt file1.txt > sandwich.txt\nrm file2.txt'
+```
+
 When all the strings are combined and formatted, the final command will be
 ```shell
 cat file1.txt file2.txt file1.txt > sandwich.txt
-#   ^ {input} expanded^
 rm file2.txt
 ```
+Note that if the trailing spaces and \n were not present, the command
+would instead be:
+```shell
+cat file1.txt file2.txtfile1.txt> sandwich.txtrm file2.txt
+```
+so the spaces and newlines must be placed carefully.  Input and output
+directives are parsed like lists, so you only need to separate the entries
+with a comma.
 
 When dealing with more complex shell operations or awk commands, remember
-to escape quotes and use double braces for single braces in the output.  E.g.
+to escape quotes (`\'`) and use double braces (`{{`) for single braces (`{`)
+in the output.  E.g.
 ```python
 shell:
     'awk \'BEGIN {{ print "hello" }}\''

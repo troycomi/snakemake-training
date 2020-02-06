@@ -35,8 +35,9 @@ noticing!
 
 Containers and environments can only be built on the head node as they require
 network connections.  If you can't run the main snakemake instance on the head
-node, you can add the option `create-envs-only` to download everything first on
-the head node, then run the main instances on a worker node.
+node, you can add the option `--create-envs-only` to just download containers.
+Running that first on the head node, will ensure they are available when run
+on worker nodes.
 
 All containers and environments are hashed and stored in unique, digested names
 based on their content.  If an environment file changes, a new environment is
@@ -58,12 +59,24 @@ we are specifically looking for version 1.3, let's look at the
 From there, we can find the docker pull command:
 `docker pull biocontainers/samtools:v1.3_cv3`.
 *Even if you want the latest version, I highly recommend setting to the latest
-version!* That way you control when an updated version of software gets used
-in your analysis.
+version!* As of this writing, v1.9 is current, so I would use the container
+`biocontainers/samtools:v1.9-4-deb_cv1` instead of `biocontainers/samtools`. 
+That way when an updated version of software comes out, I can decide if I want
+to update or keep the same version throughout my analysis.
 
 To convert the pull command to a singularity url, prepend `docker://` to the
-container name.  Within the Snakefile, we add the singularity directive to
-the rule we are affecting:
+container name. So
+```shell
+docker pull biocontainers/samtools:v1.3_cv3
+# becomes
+singularity: 'docker://biocontainers/samtools:v1.3_cv3'
+# in the snakefile
+```
+We don't have to perform the pull ourselves, snakemake will make sure it is
+present before executing.
+
+Within the Snakefile, we add the singularity directive to the rule we want it
+applied to:
 ```python
 rule index_reference:
     input:
