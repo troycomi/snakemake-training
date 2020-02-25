@@ -81,12 +81,12 @@ There are several options when dealing with strings in python:
 class partial_dict(dict):
     def __missing__(self, key):
         return '{' + key + '}'
-"FASTQ/{{sample}}_{{replicate}}_{read}.fastq.gz".format_map(partial_dict(read=1))
+"FASTQ/{sample}_{replicate}_{read}.fastq.gz".format_map(partial_dict(read=1))
 # overkill usually
 ```
-There is a keyword argument to expand with allows missing wildcards as well
+There is a keyword argument to expand which allows missing wildcards as well
 ```python
-expand("FASTQ/{{sample}}_{{replicate}}_{read}.fastq.gz",
+expand("FASTQ/{sample}_{replicate}_{read}.fastq.gz",
        read=1, allow_missing=True)
 ```
 which is what I've added in the Snakefile in the helper method `pformat`
@@ -94,7 +94,7 @@ which is what I've added in the Snakefile in the helper method `pformat`
 def pformat(string, **args):
     return expand(string, **args, allow_missing=True)
 
-pformat("FASTQ/{{sample}}_{{replicate}}_{read}.fastq.gz", read=1)
+pformat("FASTQ/{sample}_{replicate}_{read}.fastq.gz", read=1)
 ```
 
 ## Exercise 9
