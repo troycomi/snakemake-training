@@ -14,3 +14,6 @@ $ conda install -c bioconda -c conda-forge snakemake-minimal
 $ snakemake --version
 5.10.0
 ```
+
+If you are logged into Princeton University Google Apps,
+you can view the presentation [here](https://docs.google.com/presentation/d/1YETSQQq_Lthr20hc97miLX18m6DKO87MIseMrqZf-LY/edit?usp=sharing)
