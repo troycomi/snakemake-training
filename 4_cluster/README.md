@@ -138,8 +138,8 @@ With the resources specified, the only remaining changes will be to our
 snakemake command.  The main change is the `cluster` option, which tells
 snakemake how to invoke sbatch.  We will use:
 ```
---cluster "sbatch --cpus-per-task={threads} --mem={resources.mem}M\
-            --time={resources.time} --output=slurm_out/%x-%A\
+--cluster "sbatch --cpus-per-task={threads} --mem={resources.mem}M \
+            --time={resources.time} --output=slurm_out/%x-%A \
             --job-name={rule} --parsable"
 ```
 You should be able to see how the threads and resources are replaced in the
