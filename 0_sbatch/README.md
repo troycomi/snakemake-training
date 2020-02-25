@@ -23,3 +23,14 @@ In contrast to accomplishing something similar with bash scripts and array
 jobs, Snakemake is much easier to read and write and can continue each step
 individually.  We can even tailor the resources for each job depending on
 input file size and perform complex scatter-gather operations.
+
+## Exercise 0
+- What are some good and bad features of the scripts?
+- What would you have to do to analyze another sample?
+- Why is “download” a shell script instead of sbatch?
+
+Looking at align.sbatch
+- What are the inputs and outputs?
+- How is bwa version specified? Enforced?
+- Compare the sbatch directives of align and sort.  
+  How were resources likely specified between these two steps?
