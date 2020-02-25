@@ -211,5 +211,5 @@ Replace the hard coded input and output files of the bwa rule with wildcards.
 Try running with `snakemake -nq` to make sure you have valid syntax and all
 inputs can be found.  Compare with `Snakemake_final`.
 
-In the testing directory, run `snakemake -s ../3_wildcards.Snakefile -nq`.  Do
+In the testing directory, run `snakemake -s ../3_wildcards/Snakefile -nq`.  Do
 the planned jobs and counts make sense to you?
