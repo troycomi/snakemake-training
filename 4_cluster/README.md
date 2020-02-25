@@ -211,7 +211,7 @@ scheduler.
 Remove the BAMs, FASTQ and trimmed directories and try running the workflow
 again with the slurm profile:
 ```
-# in snakemake-trainging/testing
+# in snakemake-training/testing
 mkdir slurm_out
 snakemake --profile ../princeton_rc -s ../4_cluster/Snakefile
 ```
