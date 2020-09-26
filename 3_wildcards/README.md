@@ -176,13 +176,13 @@ the two sorted outputs
         'samtools sort -n {input} > {output.nsort}'
 ```
 Let's change that to take an input function as a parameter to decide if the
-'-n' flag should be added.  First, the output with wildcards is
+`-n` flag should be added.  First, the output with wildcards is
 ```python
     output:
         'sorted/{file}_{sorting}.bam',
 ```
 We need a function to check if the sorting is nsorted or csorted, and return
-'-n' when it is nsorted.  Easy enough:
+`-n` when it is nsorted.  Easy enough:
 ```python
 def sorting_arg(wildcards):
     if wildcards.sorting == 'nsorted':

@@ -20,7 +20,7 @@ rule all:
 
 # 5) build rules following pipeline with input functions above as needed
 # we will replace these with a config later
-base_url = 'http://www.starklab.org/data/arnold_science_2013'
+base_url = 'https://data.starklab.org/publications/arnold_science_2013'
 ref_url = ('ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/215/'
         'GCF_000001215.4_Release_6_plus_ISO1_MT/'
         'GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna.gz')

@@ -2,8 +2,9 @@
 > Increasingly complete example bioinformatics workflow
 
 Before you arrive, please make sure you have an account on
-[adroit](https://researchcomputing.princeton.edu/systems-and-services/available-systems/adroit)
-and install snakemake into a dedicated conda environment on adroit:
+[adroit](https://researchcomputing.princeton.edu/education/training/virtual-workshop-requirements#adroit).
+We will use ssh and work on the command line.  Also make sure you have
+installed snakemake into a dedicated conda environment on adroit:
 ```shell
 hostname
 # adroit4
@@ -14,7 +15,7 @@ conda config --env --add channels bioconda
 conda config --env --add channels conda-forge
 conda install snakemake-minimal -y
 snakemake --version
-# 5.10.0
+# 5.25.0
 ```
 
 If you are logged into Princeton University Google Apps,

@@ -2,13 +2,14 @@
 We now have a workflow specifying all commands needed to generate our output
 on any system.  However, we have several software dependencies which make
 reproduction and distribution of our workflow more difficult.  If you try
-running `snakemake` now you will run into an error when trying to use samtools.
+running `snakemake` now you will run into an error invoking samtools.
 Common methods for handling dependencies in HPC environments include modules
-or site-wide installation of common software.  Even if you put this on a
-cluster with all dependencies installed, they may not be the correct version.
+or site-wide installations of common software.  Even if you put this workflow
+on a cluster with all dependencies installed, they may not be the correct
+version.
 
 To get this workflow running, we will add several singularity containers for
-running all non-standard software.
+all non-standard software.
 
 ## Container Basics
 Docker containers package a certain version of software with all the
@@ -17,9 +18,9 @@ that is specifically designed for one piece of software.  Singularity can
 use docker files and works without root access, so it is available on HPC
 systems.
 
-Conda environments specify several python or R packages for running code.  Not
-only do you easily install all dependencies, you can maintain several versions
-of software on the same machine.
+Conda environments specify several python or R packages for running scripts.
+Not only do you easily install all dependencies, you can maintain several
+versions of software on the same machine.
 
 What this means as a user is you can guarantee a command works the same every
 time you run it by explicitly linking a rule to a container or environment.

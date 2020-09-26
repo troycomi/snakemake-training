@@ -99,7 +99,7 @@ cause an error on cluster execution.  You can set a default through the command
 line, but it's better practice to think about your resources, estimate them,
 and refine once you've executed a few samples.
 [Reportseff](https://github.com/troycomi/reportseff) can help quickly assess
-how well you are utilizing resources.
+how well you are utilizing resources with slurm jobs.
 
 ### Logical resources
 Custom resources can be anything: number of connections to a database, number
@@ -145,8 +145,8 @@ snakemake how to invoke sbatch.  We will use:
 You should be able to see how the threads and resources are replaced in the
 above. You would have to change the format if your time and memory don't
 refer to minutes and MB.  The job name is taken from the rule name.
-The output directory `slurm_out` must exist before submission or the slurm
-job will fail.  If you prefer your outputs in a different format or directory
+**The output directory `slurm_out` must exist before submission or the slurm
+job will fail.**  If you prefer your outputs in a different format or directory
 you can change those here.  It is important to add the `--parsable` flag so
 snakemake can correctly parse the external job id to check the cluster status.
 
@@ -191,8 +191,8 @@ use-conda: true
 singularity-prefix: "~/snakemake_images"
 conda-prefix: "~/snakemake_images"
 ```
-which tell snakemake to use conda and singularity and place the environments in
-the home directory.  Placing images in a central location will prevent
+which tell snakemake to use conda and singularity and place the environments
+in the home directory.  Placing images in a central location will prevent
 additional runs of snakemake from downloading redundant environments.
 
 The remaining options are the cluster command described above and values for

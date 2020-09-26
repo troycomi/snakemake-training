@@ -49,13 +49,13 @@ In the second example, `input['first_file']` and `input[0]` both refer to
 clearer.
 
 Shell directives have a richer set of operations.  Snakemake will take the
-string and perform substitutions of format tokens, similar to python 3 f-strings.
-One consequence of this behavior is to get the `first_file` from above in a
-shell directive, you use `{input[first_file]}` without the quotes.
+string and perform substitutions of format tokens, similar to python 3
+f-strings.  One consequence of this behavior is to get the `first_file` from
+above in a shell directive, you use `{input[first_file]}` without the quotes.
 
-Let's look at a rule to make a sandwich with file1 concatenated with file2, and
-another copy of file1 at the end.  When we are done we want to delete file2
-from the file system.
+Let's look at a rule to make a sandwich with file1 concatenated with file2,
+and another copy of file1 at the end.  When we are done we want to delete
+file2 from the file system.
 ```python
 rule sandwich:
     input:

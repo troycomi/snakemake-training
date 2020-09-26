@@ -1,6 +1,6 @@
 #!/bin/bash
 
-base_url="http://www.starklab.org/data/arnold_science_2013"
+base_url="https://data.starklab.org/publications/arnold_science_2013"
 wget -q -O - ${base_url}/STARRseq_input_lib5.2_1.fastq.gz | \
     zcat | head -n 4000 | gzip > FASTQ_SAMPLE_ID_1.fastq.gz
 wget -q -O - ${base_url}/STARRseq_input_lib5.2_2.fastq.gz | \
