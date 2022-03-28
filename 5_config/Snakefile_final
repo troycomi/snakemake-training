@@ -93,20 +93,16 @@ rule bwa_index:
     shell:
         'bwa index -a bwtsw {input.reference}'
 
-# parital format of wildcards
-def pformat(string, **args):
-    return expand(string, **args, allow_missing=True)
-
 rule trim:
     input:
         expand(paths['raw_fastq'], read=(1, 2), allow_missing=True)
         # setting allow_missing will keep other wildcards unformatted
 
     output:
-        trim_1=pformat(paths['trimmed_fastq'], read=1),
-        trim_2=pformat(paths['trimmed_fastq'], read=2),
-        unpaired_1=pformat(paths['unpaired_fastq'], read=1),
-        unpaired_2=pformat(paths['unpaired_fastq'], read=2),
+        trim_1=expand(paths['trimmed_fastq'], read=1, allow_missing=True),
+        trim_2=expand(paths['trimmed_fastq'], read=2, allow_missing=True),
+        unpaired_1=expand(paths['unpaired_fastq'], read=1, allow_missing=True),
+        unpaired_2=expand(paths['unpaired_fastq'], read=2, allow_missing=True),
         trimlog=paths['trimlog']
 
     singularity: config['containers']['trimmomatic']
@@ -135,8 +131,8 @@ rule bwa:
     input:
         reference=paths['reference_fna'],
         index=f'{paths["reference_fna"]}.bwt',
-        fastq1=pformat(paths['trimmed_fastq'], read=1),
-        fastq2=pformat(paths['trimmed_fastq'], read=2),
+        fastq1=expand(paths['trimmed_fastq'], read=1, allow_missing=True),
+        fastq2=expand(paths['trimmed_fastq'], read=2, allow_missing=True),
 
     output:
         paths['aligned_bam']

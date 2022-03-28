@@ -8,8 +8,8 @@ or site-wide installations of common software.  Even if you put this workflow
 on a cluster with all dependencies installed, they may not be the correct
 version.
 
-To get this workflow running, we will add several singularity containers for
-all non-standard software.
+To get this workflow running, we will add singularity containers for all
+non-standard software (i.e. tools we don't expect on a base linux system).
 
 ## Container Basics
 Docker containers package a certain version of software with all the
@@ -20,7 +20,7 @@ systems.
 
 Conda environments specify several python or R packages for running scripts.
 Not only do you easily install all dependencies, you can maintain several
-versions of software on the same machine.
+versions of libraries on the same machine.
 
 What this means as a user is you can guarantee a command works the same every
 time you run it by explicitly linking a rule to a container or environment.
@@ -34,11 +34,11 @@ The latter option will always pull the latest build which can cause your
 workflow to complete with two different versions of software without you
 noticing!
 
-Containers and environments can only be built on the head node as they require
-network connections.  If you can't run the main snakemake instance on the head
-node, you can add the option `--create-envs-only` to just download containers.
-Running that first on the head node, will ensure containers are available when
-subsequent runs are performed on worker nodes.
+Containers and environments can typically only be built on the head node as
+they require network connections.  If you can't run the main snakemake instance
+on the head node, you can add the option `--create-conda-envs-only` to just
+download containers. Running that first on the head node, will ensure
+containers are available when subsequent runs are performed on worker nodes.
 
 All containers and environments are hashed and stored in unique, digested names
 based on their content.  If an environment file changes, a new environment is
@@ -104,7 +104,7 @@ java archive file which has to be located *within* the container.
     '-jar /usr/local/share/trimmomatic-0.39-0/trimmomatic.jar '
 ```
 With a different version, that path would have to change.  This is a container
-limitation and shouldn't be the case for larger projects.
+limitation and shouldn't be the case for most projects.
 
 ## Conda directives
 Conda works similarly, except you provide the path to a

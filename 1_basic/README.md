@@ -46,7 +46,7 @@ rule dictionary_input:
 ```
 In the second example, `input['first_file']` and `input[0]` both refer to
 `file1.txt`.  Which syntax you use depends on the situation and what is
-clearer.
+clearer.  Dictionary keys can also refer to lists of files themselves.
 
 Shell directives have a richer set of operations.  Snakemake will take the
 string and perform substitutions of format tokens, similar to python 3
@@ -55,7 +55,7 @@ above in a shell directive, you use `{input[first_file]}` without the quotes.
 
 Let's look at a rule to make a sandwich with file1 concatenated with file2,
 and another copy of file1 at the end.  When we are done we want to delete
-file2 from the file system.
+file2 from the file system (to show multiple commands).
 ```python
 rule sandwich:
     input:
@@ -104,9 +104,8 @@ would instead be:
 ```shell
 cat file1.txt file2.txtfile1.txt> sandwich.txtrm file2.txt
 ```
-so the spaces and newlines must be placed carefully.  Input and output
-directives are parsed like lists, so you only need to separate the entries
-with a comma.
+Spaces and newlines must be placed carefully.  Input and output directives are
+parsed like lists, so you only need to separate the entries with a comma.
 
 When dealing with more complex shell operations or awk commands, remember
 to escape quotes (`\'`) and use double braces (`{{`) for single braces (`{`)
@@ -120,16 +119,18 @@ becomes
 awk 'BEGIN { print "hello" }'
 ```
 
-Use `snakemake -p` to see which commands are run for each rule.
+Use `snakemake -p` to see which commands are run for each rule.  More complex
+awk commands should be kept in separate files or provided as parameters to the
+rules to simplify escaping.
 
 ## Snakefiles and Rules
 The simplest project organization is to place all rules in a single file,
 called `Snakefile`.  When invoked, snakemake will automatically look for and
 load a Snakefile in the current directory.  When no other target is specified,
-the first rule (usually called 'all') is made.
+the first rule (usually called 'all') is "made".
 
 Good practice is to include all 'final' outputs in the rule all and then
-detail each rule in the order of the workflow.
+detail each rule in the order of the workflow, from inputs to outputs.
 
 Generally, each rule should do one thing.  Consider `0_download.sh`:
 ```shell
@@ -146,7 +147,7 @@ bwa index -a bwtsw $reference_file
 This downloads a reference sequence and then indexes it for following steps.
 Eventually we will use singularity for dependencies like samtools and bwa,
 so the 2 indexing steps should be split into two rules to keep containers
-simple. Additionally, if the steps were separate and analysis was stopped
+separate. Additionally, if the steps were separate and analysis was stopped
 after downloading, snakemake would detect the fna file exists and skip
 downloading it.
 
@@ -168,26 +169,26 @@ use the file named Snakefile in the current directory and target the first rule
 for generating outputs.  Alternatively, targets may be specified directly as
 command line arguments.  Snakemake has [several options](https://snakemake.readthedocs.io/en/stable/executing/cli.html#all-options)
 but I most commonly use the following:
-- n: perform a dry run, listing which rules are needed to create the target
+- `n`: perform a dry run, listing which rules are needed to create the target
   without actually executing them.  Useful for checking syntax and the expected
   number of rules are found and executed.
-- q: quiet mode.  Suppress most output of snakemake except for the rule counts.
+- `q`: quiet mode.  Suppress most output of snakemake except for the rule counts.
   I almost always run `snakemake -nq` prior to starting a run!
-- r: state the reason for running a rule.  Useful for when *more* rules are
+- `r`: state the reason for running a rule.  Useful for when *more* rules are
   scheduled to run than you expect.  If a rule has several inputs, will tell
   you which ones have updated and are causing a rule to 'rerun'.
-- p: list prompt.  Show the shell command that would run for each rule.  Handy
+- `p`: list prompt.  Show the shell command that would run for each rule.  Handy
   for debugging or checking workflows, but quickly gets too verbose for complex
   rules.
-- use-singularity/use-conda.  If you specify a conda environment or singularity
-  container for a rule, you have to run snakemake with the respective option
-  for snakemake to actually use them.
-- snakefile: specify the path to the snakefile
-- j, cores, jobs: the number of cores to use (locally) or jobs to run at once
-  (on a cluster)
-- cluster: specify command for cluster submission.  See part 4 for details.
-- configfile: specify additional config files
-- directory, d: specify the base, working directory
+- `use-singularity/use-conda`:  If you specify a conda environment or
+  singularity container for a rule, you have to run snakemake with the
+  respective option for snakemake to actually use them.
+- `snakefile`: specify the path to the snakefile
+- `j`, `cores`, `jobs`: the number of cores to use (locally) or jobs to run at
+  once (on a cluster)
+- `cluster`: specify command for cluster submission.  See part 4 for details.
+- `configfile`: specify additional config files
+- `directory`, `d`: specify the base, working directory
 
 There are clearly several options that will make your snakemake command quite
 long!  To better distribute and reproduce your runs, we will use profiles

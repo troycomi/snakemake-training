@@ -1,15 +1,15 @@
 # Configuration Files
 Looking at the last Snakefile, we have several hard coded variables that
-are independent of the workflow that we may want to change later.  What if
+are independent of the workflow which we may want to change later.  What if
 we want to change our reference genome? Or the project structure location?
 In keeping with the don't repeat yourself principle, we also reuse path
 locations several times, like `sorted/{sample}_{replicate}_{sorting}.bam`.
 
 Here we will address these issues using a configuration file.  Similar to
-profiles we introduced last time, we want to abstract our particular instance
-of a run from our workflow.  The idea is that if you want to redo an
-analysis or distribute it, you only have to change the file paths or options
-in a config, but the underlying analysis steps will be unchanged.
+profiles we introduced last time, we want to separate our particular instance
+of a run from our workflow.  The idea is that if you want to redo an analysis
+or distribute it, you only have to change the file paths or options in a
+config, but the underlying analysis steps will be unchanged.
 
 ## The config file
 Config files are json or yaml documents that will be converted into a python
@@ -17,8 +17,7 @@ dictionary in our Snakefile.  You can create lists, objects and nest as deep
 as you need.  Because the snytax gets tiresome and verbose, try to keep nesting
 to just a few levels.  I always have a `paths` top level that contains all
 the local file system directories.  A `containers` entry is also good to
-keep all software versions together.  If you have several options for a command
-you can also make the command an entry with each option name as a key-value.
+keep all software versions together.
 
 Here are the first few lines of the config.yaml
 ```yaml
@@ -32,7 +31,7 @@ urls:
               GCF_000001215.4_Release_6_plus_ISO1_MT/\
               GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna.gz"
 ```
-In our rule, we then have
+In our Snakefile, we then have
 ```python
 configfile: 'config.yaml'
 # I like to set this as a separate variable because I use it a lot
@@ -46,13 +45,13 @@ rule download_reference:
     shell:
         'wget -q -O - {config[urls][reference]} | gunzip -c > {output}'
 ```
-The first line tells snakemake where to find the config file, which causes
-it to load the values into the `config` dictionary.  Because I use paths more
-than any other value, I usually set it to `paths`.  A point of confusion is that
-config keys do not need quotes within a shell directive,
+The first line tells snakemake where to find the config file, which causes it
+to load the values into the `config` dictionary.  Because I use paths more than
+any other value, I usually set it to `paths`.  A point of confusion is that in
+contrast to f-strings, config keys do not need quotes within a shell directive,
 `{config[urls][reference]}` above.  This is because snakemake does additional
 processing to the string before making a shell script and is similar to using
-named lists for input/output.  When outside of that context or when using
+named lists for input/output.  When outside of shell directives or when using
 python f-strings, you DO need quotes, `paths['reference_fna']` above.
 
 ## Exercise 8
@@ -84,17 +83,12 @@ class partial_dict(dict):
 "FASTQ/{sample}_{replicate}_{read}.fastq.gz".format_map(partial_dict(read=1))
 # overkill usually
 ```
-There is a keyword argument to expand which allows missing wildcards as well
+
+In snakemake, there is a keyword argument to expand which allows missing
+wildcards, which is usually the best option.
 ```python
 expand("FASTQ/{sample}_{replicate}_{read}.fastq.gz",
        read=1, allow_missing=True)
-```
-which is what I've added in the Snakefile in the helper method `pformat`
-```python
-def pformat(string, **args):
-    return expand(string, **args, allow_missing=True)
-
-pformat("FASTQ/{sample}_{replicate}_{read}.fastq.gz", read=1)
 ```
 
 ## Exercise 9
@@ -139,9 +133,9 @@ Generally:
 - Fewer config files are better than more.  If you must split your config
   be certain you have no overlapping keys or be careful when you load.  Load
   config files in one way (e.g. only in the Snakefile).
-- Don't use the config option.  It is hard to document a command line option
-  so your work will be harder to replicate.
-- While your config paths may not matter for reproducibility, the options and
+- Don't use the config command line option.  It is hard to document a command
+  line option so your work will be harder to replicate.
+- While your file paths may not matter for reproducibility, the options and
   version numbers certainly do!  It's important to keep a record of what was
   run and your snakefile and config file (together) can do that.
 

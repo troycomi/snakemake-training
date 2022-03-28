@@ -131,7 +131,7 @@ resource isn't specified in a rule, its value is set to 0 by default.
 ## Exercise 6
 Add resources to the bwa rule.  If you aren't sure what values to use, you can
 start with those in the original sbatch script.  Don't forget threads and be
-sure to update the command!
+sure to update the bwa command!
 
 ## Cluster execution
 With the resources specified, the only remaining changes will be to our
@@ -142,8 +142,8 @@ snakemake how to invoke sbatch.  We will use:
             --time={resources.time} --output=slurm_out/%x-%A \
             --job-name={rule} --parsable"
 ```
-You should be able to see how the threads and resources are replaced in the
-above. You would have to change the format if your time and memory don't
+You should be comfortable with how the threads and resources are replaced in the
+command. You would have to change the format if your time and memory don't
 refer to minutes and MB.  The job name is taken from the rule name.
 **The output directory `slurm_out` must exist before submission or the slurm
 job will fail.**  If you prefer your outputs in a different format or directory
@@ -155,7 +155,7 @@ additional options:
 - cluster-status: pass the path to a script which will take an external job id
   and return "success" or "failed".  Must be executable.
 - latency-wait: how long (in seconds) to wait for missing files. The default,
-  5 seconds, may be too short for some NFS systems.  120 is safer and doesn't
+  5 seconds, may be too short for some NFS's.  120 is safer and doesn't
   affect performance much.
 - jobs: The maximum number of cluster jobs to run at once.  250 is far from the
   cluster max and allows me to run several different pipelines at once.
@@ -170,7 +170,7 @@ Since our command is getting complex, it's time to introduce profiles.
 Profiles are configurations that tell snakemake how to interact with the
 underlying compute engine. The idea is you can use this same profile for all
 of your workflows and when you distribute the workflow, the user only needs
-to touch the profile.  There are cookie cutter versions
+to touch the profile for their scheduler.  There are cookie cutter versions
 [available](https://github.com/Snakemake-Profiles/slurm), but we will build
 our own since it is more transparent.  The slurm-status.py script is from
 that repository.
@@ -187,6 +187,7 @@ basic configuration options:
 ```yaml
 use-singularity: true
 use-conda: true
+printshellcmds: true
 
 singularity-prefix: "~/snakemake_images"
 conda-prefix: "~/snakemake_images"
@@ -219,6 +220,5 @@ Monitor the slurm queue (`squeue -u $USER -i 5`),
 slurm\_out (`watch -n 5 'ls -lh'`), and the snakemake output using tmux,
 or just watch the snakemake output.
 
-If you have reportseff installed
-(`pip install git+https://github.com/troycomi/reportseff`)
-check the efficiency with `reportseff` in the slurm\_out directory
+If you have reportseff installed (`pip install reportseff`) check the
+efficiency with `reportseff` in the slurm\_out directory

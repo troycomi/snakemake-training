@@ -34,7 +34,7 @@ rule sort:
 
 When you target `abc.sorted.txt`, snakemake decides that the rule `sort` matches
 and further matches the wildcard `sample` to abc.  It then looks at the input,
-and matches the sample wildcard to 'abc', creating an job from the rule:
+and matches the sample wildcard to 'abc', creating a job from the rule:
 
 ```python
 rule sort:
@@ -54,9 +54,10 @@ rule process:
         'log_{sample}.txt'
 ```
 Several sample, read pairs would be writing to the same log.  Snakemake raises
-an error in this case as an output file is not uniquely determined.
+an error in this case as an output file is not uniquely determined.  Similarly,
+all wildcards in input files must have matches in output file wildcards.
 
-## Wildcards for building outputs
+## Wildcards for dynamic listing of outputs
 Since snakemake evaluates the workflow 'backwards', it is initially challenging
 to think about how to request something like "all outputs given my inputs",
 which is a common analysis task.  The first step is to find all the input
@@ -119,12 +120,12 @@ will throw an error, giving some recommendations.  We could constrain the
 sample wildcard, by say excluding all underscores `[^_]+` or give priority to
 sort\_bam rules.  However, the easiest method is to just put the sorted bams
 in a separate directory.  The hierarchical structure is easier to work with and
-it's the least likely for error.
+it's the least likely to generate ambiguous errors.
 
 ## Params
-There's nothing stopping us from using multiple wildcards. Looking
-at the url of our input data, it seems like we should have a wildcard for
-the sample, another for the replicate, and the read of our paired read:
+There's nothing stopping us from using multiple wildcards in a single filename.
+Looking at the url of our input data, it seems like we should have a wildcard
+for the sample, another for the replicate, and the read of our paired read:
 ```python
 {base_url}/S2_STARRseq_rep1_2.fastq.gz
 #    sample^     replicate^ ^read
@@ -204,12 +205,12 @@ independently, decreasing wall time and possibly eliminating one sorting
 if it is no longer needed.
 
 Input functions can be any function, but most often I use them to aggregate
-files or select a value from a dictionary.
+files or select a value from a dictionary or dataframe.
 
 ## Exercise 5
 Replace the hard coded input and output files of the bwa rule with wildcards.
 Try running with `snakemake -nq` to make sure you have valid syntax and all
 inputs can be found.  Compare with `Snakemake_final`.
 
-In the testing directory, run `snakemake -s ../3_wildcards/Snakefile -nq`.  Do
-the planned jobs and counts make sense to you?
+In the `testing` directory, run `snakemake -s ../3_wildcards/Snakefile -nq`.
+Do the planned jobs and counts make sense to you?

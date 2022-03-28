@@ -2,6 +2,7 @@
 # basic configuration
 use-singularity: true
 use-conda: true
+printshellcmds: true
 
 # these control where the images are stored.  If you have a central location
 # you don't have to remake images when changing working directory
@@ -14,6 +15,8 @@ cluster: "sbatch --cpus-per-task={threads} --mem={resources.mem}M \
             --time={resources.time} --output=slurm_out/%x-%A \
             --job-name={rule} --parsable"
 cluster-status: "slurm-status.py"
+cluster-cancel: scancel
+cluster-cancel-nargs: 50
 latency-wait: 120  # wait 2 minutes for missing files before raising exception
                    # important for NFS
 jobs: 250  # maximum jobs to run at once

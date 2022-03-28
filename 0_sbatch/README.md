@@ -1,16 +1,16 @@
 # SBATCH scripts
 
 These are the starting workflow files.  They contain a common series of steps
-in a bioinformatics pipeline.  Namely downloading files, removing sequencing
+in bioinformatics pipelines.  Namely downloading files, removing sequencing
 tags (trimming), aligning to a reference sequence, and sorting the aligned
 sequences for additional analyses.
 
-The order of execution is dictated by the user, who should follow them in
-numerical order.  There are several positive aspects of each file including
+The order of execution is dictated by the user, who should follow them
+sequentially.  There are several positive aspects of each file including
 well documented names and versions of software, but all filenames are hard
 coded into the scripts.  While software versions are specified in the comments,
 it's up to the user to actually ensure they are installed with the correct
-version.  
+dependencies.
 
 Our goal will be to replace these files with a Snakemake workflow which will
 scale to many samples, handle versions and software through singularity and
@@ -21,7 +21,7 @@ jobs.
 
 In contrast to accomplishing something similar with bash scripts and array
 jobs, Snakemake is much easier to read and write and can continue each step
-individually.  We can even tailor the resources for each job depending on
+independently.  We can even tailor the resources for each job depending on
 input file size and perform complex scatter-gather operations.
 
 ## Exercise 0

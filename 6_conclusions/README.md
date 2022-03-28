@@ -15,6 +15,6 @@ I highly recommend reading through the
 [rules documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html),
 I always learn something new from that page.
 
-Developers are also activate on
+Developers are also active on
 [github](https://github.com/snakemake/snakemake) and 
 [stackoverflow](https://stackoverflow.com/questions/tagged/snakemake).
