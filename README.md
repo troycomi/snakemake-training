@@ -9,7 +9,7 @@ make sure you have
 into a dedicated conda environment, on adroit:
 ```shell
 hostname
-# adroit4
+# adroit5
 module load anaconda3/2021.11
 conda create -n snake -y
 conda activate snake
