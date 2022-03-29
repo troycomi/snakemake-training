@@ -2,6 +2,7 @@
 # basic configuration
 use-singularity: true
 use-conda: true
+conda-frontend: conda
 printshellcmds: true
 
 # these control where the images are stored.  If you have a central location
