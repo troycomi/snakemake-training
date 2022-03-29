@@ -70,7 +70,7 @@ To convert the pull command from docker hub to a singularity url, add
 ```shell
 docker pull biocontainers/samtools:v1.3_cv3
 # becomes
-singularity: 'docker://biocontainers/samtools:v1.3_cv3'
+container: 'docker://biocontainers/samtools:v1.3_cv3'
 # in the snakefile
 ```
 We don't have to perform the pull ourselves, snakemake will make sure it is
@@ -86,7 +86,7 @@ rule index_reference:
     output:
         'GENOME_PATH/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna.fai'
 
-    singularity: 'docker://biocontainers/samtools:v1.3_cv3'
+    container: 'docker://biocontainers/samtools:v1.3_cv3'
 
     shell:
         'samtools faidx {input}'

@@ -56,7 +56,7 @@ rule index_reference:
     output:
         f'{reference}.fai'
 
-    singularity: 'docker://biocontainers/samtools:v1.3_cv3'
+    container: 'docker://biocontainers/samtools:v1.3_cv3'
 
     shell:
         'samtools faidx {input}'
@@ -69,7 +69,7 @@ rule bwa_index:
     output:
         [f'{reference}.{ext}' for ext in 'bwt pac ann amb sa'.split()]
 
-    singularity: 'docker://biocontainers/bwa:v0.7.17-3-deb_cv1'
+    container: 'docker://biocontainers/bwa:v0.7.17-3-deb_cv1'
 
     shell:
         'bwa index -a bwtsw {input.reference}'
@@ -86,7 +86,7 @@ rule trim:
         unpaired_2='trimmed/{file}_2.unpaired.fastq.gz',
         trimlog='trimmed/{file}_trimlog'
 
-    singularity: 'docker://quay.io/biocontainers/trimmomatic:0.39--0'
+    container: 'docker://quay.io/biocontainers/trimmomatic:0.39--0'
 
     shell:
         'java -Xmx8000m '
@@ -115,7 +115,7 @@ rule bwa:
     output:
         'BAMs/SAMPLE_ID.bam'
 
-    singularity: 'docker://biocontainers/bwa:v0.7.17-3-deb_cv1'
+    container: 'docker://biocontainers/bwa:v0.7.17-3-deb_cv1'
 
     shell:
         'bwa mem '
@@ -147,7 +147,7 @@ rule sort_bam:
     params:
         sorting=sorting_arg
 
-    singularity: 'docker://biocontainers/samtools:v1.3_cv3'
+    container: 'docker://biocontainers/samtools:v1.3_cv3'
 
     shell:
         'samtools sort {params.sorting} {input} > {output}'

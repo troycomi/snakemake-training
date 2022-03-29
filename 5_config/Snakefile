@@ -60,7 +60,7 @@ rule index_reference:
         f'{paths["reference_fna"]}.fai'
         # NOTE in normal python syntax we DO need quotes
 
-    singularity: config['containers']['samtools']
+    container: config['containers']['samtools']
 
     threads: 1
 
@@ -81,7 +81,7 @@ rule bwa_index:
         [f'{paths["reference_fna"]}.{ext}'
             for ext in 'bwt pac ann amb sa'.split()]
 
-    singularity: config['containers']['bwa']
+    container: config['containers']['bwa']
 
     threads: 1
 
@@ -105,7 +105,7 @@ rule trim:
         unpaired_2=expand(paths['unpaired_fastq'], read=2, allow_missing=True),
         trimlog=paths['trimlog']
 
-    singularity: config['containers']['trimmomatic']
+    container: config['containers']['trimmomatic']
 
     threads: 4
 
@@ -139,7 +139,7 @@ rule bwa:
     output:
         'BAMs/{file}.bam'
 
-    singularity: 'docker://biocontainers/bwa:v0.7.17-3-deb_cv1'
+    container: 'docker://biocontainers/bwa:v0.7.17-3-deb_cv1'
 
     threads: 4
 
@@ -170,7 +170,7 @@ rule sort_bam:
     params:
         sorting=sorting_arg
 
-    singularity: config['containers']['samtools']
+    container: config['containers']['samtools']
 
     threads: 1
 

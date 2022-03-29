@@ -53,7 +53,7 @@ rule index_reference:
     output:
         'GENOME_PATH/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna.fai'
 
-    singularity: 'docker://biocontainers/samtools:v1.3_cv3'
+    container: 'docker://biocontainers/samtools:v1.3_cv3'
 
     shell:
         'samtools faidx {input}'
@@ -70,7 +70,7 @@ rule bwa_index:
         'GENOME_PATH/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna.amb',
         'GENOME_PATH/GCF_000001215.4_Release_6_plus_ISO1_MT_genomic.fna.sa',
 
-    singularity: 'docker://biocontainers/bwa:v0.7.17-3-deb_cv1'
+    container: 'docker://biocontainers/bwa:v0.7.17-3-deb_cv1'
 
     shell:
         'bwa index -a bwtsw {input.reference}'
@@ -87,7 +87,7 @@ rule trim:  # name will be used for job-name later
         unpaired_2='trimmed/SAMPLE_ID_2.unpaired.fastq.gz',
         trimlog='trimmed/SAMPLE_ID_trimlog'
 
-    singularity: 'docker://quay.io/biocontainers/trimmomatic:0.39--0'
+    container: 'docker://quay.io/biocontainers/trimmomatic:0.39--0'
 
     shell:
         'java -Xmx8000m '
@@ -115,7 +115,7 @@ rule bwa:
     output:
         'BAMs/SAMPLE_ID.bam'
 
-    # TODO: add singularity directive for version 0.7.17
+    # TODO: add container directive for version 0.7.17
 
     shell:
         'bwa mem '
@@ -133,7 +133,7 @@ rule sort_bam:
         csort='BAMs/SAMPLE_ID_csorted.bam',
         nsort='BAMs/SAMPLE_ID_nsorted.bam',
 
-    singularity: 'docker://biocontainers/samtools:v1.3_cv3'
+    container: 'docker://biocontainers/samtools:v1.3_cv3'
 
     shell:
         'samtools sort {input} > {output.csort} \n'  # NOTE \n, makes two commands
