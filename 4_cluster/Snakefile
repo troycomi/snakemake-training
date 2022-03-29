@@ -91,7 +91,7 @@ rule bwa_index:
     output:
         [f'{reference}.{ext}' for ext in 'bwt pac ann amb sa'.split()]
 
-    container: 'docker://biocontainers/bwa:v0.7.17-3-deb_cv1'
+    container: 'docker://biocontainers/bwa:v0.7.17_cv1'
 
     threads: 1
 
@@ -149,7 +149,7 @@ rule bwa:
     output:
         'BAMs/{file}.bam'
 
-    container: 'docker://biocontainers/bwa:v0.7.17-3-deb_cv1'
+    container: 'docker://biocontainers/bwa:v0.7.17_cv1'
 
     # TODO add resource and thread directives and update the shell command
 

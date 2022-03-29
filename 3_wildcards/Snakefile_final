@@ -69,7 +69,7 @@ rule bwa_index:
     output:
         [f'{reference}.{ext}' for ext in 'bwt pac ann amb sa'.split()]
 
-    container: 'docker://biocontainers/bwa:v0.7.17-3-deb_cv1'
+    container: 'docker://biocontainers/bwa:v0.7.17_cv1'
 
     shell:
         'bwa index -a bwtsw {input.reference}'
@@ -114,7 +114,7 @@ rule bwa:
     output:
         'BAMs/{file}.bam'
 
-    container: 'docker://biocontainers/bwa:v0.7.17-3-deb_cv1'
+    container: 'docker://biocontainers/bwa:v0.7.17_cv1'
 
     shell:
         'bwa mem '
