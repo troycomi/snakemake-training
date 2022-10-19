@@ -10,14 +10,14 @@ into a dedicated conda environment, on adroit:
 ```shell
 hostname
 # adroit5
-module load anaconda3/2021.11
+module load anaconda3/2022.5
 conda create -n snake -y
 conda activate snake
 conda config --env --add channels bioconda
 conda config --env --add channels conda-forge
 conda install snakemake-minimal -y
 snakemake --version
-# 7.3.2
+# 7.16.0
 ```
 
-You can view the presentation [here](https://docs.google.com/presentation/d/1pvMBslE79LNrMrx5MUVCvugh3uSo_Xirayen4R7rvAg/edit?usp=sharing).
+You can view the presentation [here](https://docs.google.com/presentation/d/1t59lCCWfZOwfAq9HvE2KB5uhTL7S10EH6xNEygGJ1Wg/edit?usp=sharing).
